@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,67 +17,7 @@ public class Minifier {
 
     private static final Pattern SCRIPT_PATTERN = Pattern.compile("<script.*\\s+src\\s*=.*>\\s*</\\s*script>");
     private static final Pattern SCRIPT_SOURCE_PATTERN = Pattern.compile("src\\s*=\\s*\\\".*\\\"");
-    private static final Pattern INLINE_SCRIPT_PATTERN = Pattern.compile("<script\\s*>");
     private static final String SERVER_CODE_TOKEN = "<?";
-    private static final String SEPARATOR = "|";
-
-    @Deprecated
-    private static List<List<String>> extractScriptGroups(String filename) {
-        Path path = Paths.get(filename);
-        try (Stream<String> lines = Files.lines(path)) {
-
-            Stream<List<String>> scripts = lines
-                .map((line) -> {
-                    Matcher m = Minifier.SCRIPT_PATTERN.matcher(line);
-                    if (!m.find()) {
-                        if (Minifier.INLINE_SCRIPT_PATTERN.matcher(line).find()) {
-                            return Arrays.asList(Minifier.SEPARATOR);
-                        }
-                        return Collections.emptyList();
-                    }
-
-                    List<String> subscripts = new ArrayList<>();
-                    do {
-                        String match = m.group();
-                        Matcher sourceMatcher = Minifier.SCRIPT_SOURCE_PATTERN.matcher(match);
-                        if (sourceMatcher.find()) {
-                            String scriptMatch = sourceMatcher.group();
-
-                            if (scriptMatch.contains(Minifier.SERVER_CODE_TOKEN)) {
-                                subscripts.add(Minifier.SEPARATOR);
-                                continue;
-                            }
-
-                            String script = scriptMatch.substring(scriptMatch.indexOf("\"") + 1, scriptMatch.length() - 1);
-                            subscripts.add(script);
-                        }
-                    } while (m.find());
-                    return subscripts;
-                });
-
-            List<List<String>> splitScripts = new ArrayList<>();
-            splitScripts.add(new ArrayList<>());
-            scripts.forEachOrdered(subscripts -> {
-                List<String> currentList = splitScripts.get(splitScripts.size() - 1);
-                for (String script : subscripts) {
-                    if (script.equals(Minifier.SEPARATOR)) {
-                        if (!currentList.isEmpty()) {
-                            currentList = new ArrayList<>();
-                            splitScripts.add(currentList);
-                        }
-                        continue;
-                    }
-                    currentList.add(script);
-                }
-            });
-
-            return splitScripts;
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
-        }
-    }
 
     private static List<String> extractScripts(String filename) {
         Path path = Paths.get(filename);
