@@ -13,8 +13,8 @@ public class CssContentsTransformer extends FileContentsFetcher {
     private static final Pattern CSS_URL = Pattern.compile("url\\([^\\)]+\\)");
 
     @Override
-    public String fetch(String filename, String workingDir) throws IOException {
-        String content = super.fetch(filename, workingDir);
+    public String fetch(String filename, String workingDir, String destDir) throws IOException {
+        String content = super.fetch(filename, workingDir, destDir);
 
         Matcher m = CssContentsTransformer.CSS_URL.matcher(content);
 
@@ -27,7 +27,7 @@ public class CssContentsTransformer extends FileContentsFetcher {
 
             String url = match.substring(4, match.length() - 1).replaceAll("'", "");
             Path sourcePath = Paths.get(Paths.get(workingDir, filename).getParent().toString() + "/" + url);
-            Path dest = Paths.get(workingDir, "css-img", url);
+            Path dest = Paths.get(destDir, "css-img", url);
 
             Files.createDirectories(dest.getParent());
 

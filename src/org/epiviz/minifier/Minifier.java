@@ -117,12 +117,12 @@ public class Minifier {
         }
     }
 
-    private static String concatenateFilesContents(List<String> files, String basePath, FileContentsFetcher contentsFetcher) {
+    private static String concatenateFilesContents(List<String> files, String basePath, String destPath, FileContentsFetcher contentsFetcher) {
         StringBuilder concatenated = new StringBuilder();
         for (String file : files) {
             String content = "";
             try {
-                content = contentsFetcher.fetch(file, basePath);
+                content = contentsFetcher.fetch(file, basePath, destPath);
             } catch (IOException e) {
                 System.err.println("Could not read contents of " + file + "; skipping.");
             }
@@ -131,8 +131,8 @@ public class Minifier {
         return concatenated.toString();
     }
 
-    private static String concatenateFilesContents(List<String> files, String basePath) {
-        return Minifier.concatenateFilesContents(files, basePath, new FileContentsFetcher());
+    private static String concatenateFilesContents(List<String> files, String basePath, String destPath) {
+        return Minifier.concatenateFilesContents(files, basePath, destPath, new FileContentsFetcher());
     }
 
     private static void removeCommentsFromFile(String file) {
@@ -169,20 +169,21 @@ public class Minifier {
     public static void main(String[] args) {
         String filename = args[0];
         String basePath = Paths.get(filename).getParent().toString();
+	String outPath = args[1];
 
         List<String> styles = Minifier.extractStyles(filename);
 
         PrintStream out = System.out;
 
         try {
-            String concatStyles = Minifier.concatenateFilesContents(styles, basePath, new CssContentsTransformer());
-            Files.write(Paths.get(basePath + "/concat.css"), concatStyles.getBytes());
+            String concatStyles = Minifier.concatenateFilesContents(styles, basePath, outPath, new CssContentsTransformer());
+            Files.write(Paths.get(outPath + "/concat.css"), concatStyles.getBytes());
 
-            System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(basePath + "/min.css"))));
-            YUICompressor.main(new String[] {"--type", "css", basePath + "/concat.css"});
+            System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(outPath + "/min.css"))));
+            YUICompressor.main(new String[] {"--type", "css", outPath + "/concat.css"});
             System.setOut(out);
 
-            Minifier.removeCommentsFromFile(basePath + "/min.css");
+            Minifier.removeCommentsFromFile(outPath + "/min.css");
 
         } catch (IOException e) {
             // TODO Auto-generated catch block
@@ -192,16 +193,16 @@ public class Minifier {
         List<String> scripts = Minifier.extractScripts(filename);
 
         try {
-            String concatScripts = Minifier.concatenateFilesContents(scripts, basePath);
+            String concatScripts = Minifier.concatenateFilesContents(scripts, basePath, outPath);
 
-            Files.write(Paths.get(basePath + "/concat.js"), concatScripts.getBytes());
+            Files.write(Paths.get(outPath + "/concat.js"), concatScripts.getBytes());
 
-            System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(basePath + "/min.js"))));
-            EpivizClosureCommandLineRunner runner = new EpivizClosureCommandLineRunner(new String[] {"--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", basePath + "/concat.js"});
+            System.setOut(new PrintStream(new BufferedOutputStream(new FileOutputStream(outPath + "/min.js"))));
+            EpivizClosureCommandLineRunner runner = new EpivizClosureCommandLineRunner(new String[] {"--compilation_level", "SIMPLE_OPTIMIZATIONS", "--js", outPath + "/concat.js"});
             runner.epivizRun();
             System.setOut(out);
 
-            Minifier.trimCommentsFromFile(basePath + "/min.js");
+            Minifier.trimCommentsFromFile(outPath + "/min.js");
 
         } catch (IOException e) {
             // TODO Auto-generated catch block

@@ -6,7 +6,7 @@ Java program to minify epiviz javascript code
 To run:
 
 ```
-java -jar minifier.jar <path to epiviz>/index.php
+java -jar minifier.jar <path to epiviz>/index.php <output_path>
 ```
 
 This generates four files and two directories:
@@ -17,3 +17,14 @@ This generates four files and two directories:
 * ```min.css``` contains the minified CSS code
 * ```css-img``` contains most of css images
 * ```images``` contains the rest of the css images
+
+To compile:
+
+Assumes ant is installed:
+
+```
+ant jar
+```
+
+Creates the file `bin/minifier.jar`.
+
