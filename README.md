@@ -6,5 +6,14 @@ Java program to minify epiviz javascript code
 To run:
 
 ```
-java -jar minifier.jar <path to epiviz>/index.php > epiviz-min.js
+java -jar minifier.jar <path to epiviz>/index.php
 ```
+
+This generates four files and two directories:
+
+* ```concat.js``` contains all the Epiviz library, concatenated into one file.
+* ```min.js``` the minified Epiviz library
+* ```concat.css``` contains all the CSS code
+* ```min.css``` contains the minified CSS code
+* ```css-img``` contains most of css images
+* ```images``` contains the rest of the css images
