@@ -6,7 +6,7 @@ Java program to minify epiviz javascript code
 To run:
 
 ```
-java -jar -Done-jar.silent=TRUE minifier.jar <path to epiviz>/index.php <output_path>
+java -jar -Done-jar.silent=true minifier.jar <path to epiviz>/index.php <output_path>
 ```
 
 This generates four files and two directories:
